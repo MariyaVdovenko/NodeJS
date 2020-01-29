@@ -1,0 +1,32 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "engines": {
+    "node": "10.15.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MariyaVdovenko/NodeJS.git"
+  },
+  "author": "Mariya Vdovenko <m.vdovenko@ukr.net>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MariyaVdovenko/NodeJS/issues"
+  },
+  "homepage": "https://github.com/MariyaVdovenko/NodeJS#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1"
+  },
+  "dependencies": {
+    "gh-pages": "^2.2.0",
+    "shortid": "^2.2.15",
+    "yargs": "^15.1.0"
+  }
+}
