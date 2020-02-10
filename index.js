@@ -3,15 +3,10 @@ const app = express();
 const logger = require('morgan');
 const cors = require('cors');
 const port = process.env.PORT || 5000;
+const dbConnection = require('./db/dbConnection');
 
-const {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContact,
-} = require('./contacts');
-
+dbConnection();
+const Contact = require('./model/contact');
 app.use(logger('dev'));
 app.use(cors('*'));
 app.use(express.json());
@@ -25,36 +20,35 @@ app.use('/', (req, res, next) => {
 
 app.get('/api/contacts', async (req, res) => {
   try {
-    const contacts = await listContacts();
+    const contacts = await Contact.find();
     res.json(contacts);
   } catch (err) {
-    console.log(err);
+    res.status(400).json({ err: err });
   }
 });
 
-app.get('/api/contacts/:contactId', async (req, res) => {
+app.get('/api/contacts/:contactId', (req, res) => {
   const contactId = req.params.contactId;
 
-  try {
-    const contact = await getContactById(contactId);
-
-    if (!contact) {
-      res.status(404).json({ message: 'Not found' });
-    } else {
-      res.status(200).json(contact);
-    }
-  } catch (err) {
-    console.log(err);
-  }
+  Contact.findById(contactId)
+    .then(contact => {
+      if (!contact) {
+        return res.status(404).json({ message: 'Not found' });
+      }
+      res.status(200).json({ contact: contact });
+    })
+    .catch(err => res.status(404).json({ err: err }));
 });
 
 app.post('/api/contacts', async (req, res) => {
-  const { name, email, phone } = req.body;
+  const dataContact = req.body;
 
   try {
-    if (name && email && phone) {
-      const result = await addContact(name, email, phone);
-      res.status(201).json(result);
+    if (dataContact) {
+      const newContact = new Contact(dataContact);
+      console.log(`new contact:`, newContact);
+      const result = await newContact.save();
+      res.status(201).json({ user: result });
     } else {
       res.status(400).json({ message: 'missing required name field' });
     }
@@ -63,38 +57,37 @@ app.post('/api/contacts', async (req, res) => {
   }
 });
 
-app.delete('/api/contacts/:contactId', async (req, res) => {
+app.delete('/api/contacts/:contactId', (req, res) => {
   const contactId = req.params.contactId;
-  try {
-    const contact = await removeContact(contactId);
 
-    if (!contact) {
-      res.status(404).json({ message: 'Not found' });
-    } else {
-      res.status(200).json({ message: 'contact deleted' });
-    }
-  } catch (err) {
-    console.log(err);
-  }
+  Contact.findOneAndDelete({ _id: contactId })
+    .then(contact => {
+      if (!contact) {
+        return res.status(404).json({ message: 'Not found' });
+      }
+      res.status(200).json({ contact: contact, message: 'contact deleted' });
+    })
+    .catch(err => res.status(404).json({ err: err }));
 });
 
-app.patch('/api/contacts/:contactId', async (req, res) => {
+app.patch('/api/contacts/:contactId', (req, res) => {
   const contactId = req.params.contactId;
   const changes = req.body;
-
-  try {
-    if (!changes) {
-      res.status(400).json({ message: 'missing fields' });
-    } else {
-      const updatingContacts = await updateContact(contactId, changes);
-      if (!updatingContacts) {
-        res.status(404).json({ message: 'Not found' });
-      } else {
-        res.status(200).json(updatingContacts);
-      }
-    }
-  } catch (err) {
-    console.log(err);
+  if (!changes) {
+    res.status(400).json({ message: 'missing fields' });
+  } else {
+    Contact.findOneAndUpdate(
+      { _id: contactId },
+      { $set: changes },
+      { new: true },
+    )
+      .then(contact => {
+        if (!contact) {
+          return res.status(404).json({ message: 'Not found' });
+        }
+        res.status(200).json({ contact: contact });
+      })
+      .catch(err => res.status(404).json({ err: err }));
   }
 });
 
