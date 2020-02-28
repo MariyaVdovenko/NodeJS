@@ -1,5 +1,6 @@
 const Users = require('../model/users');
 
+
 module.exports = async (req, res) => {
   try {
     const body = req.body;
