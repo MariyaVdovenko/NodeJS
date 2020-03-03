@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 function dbConnection() {
   mongoose.connect(
-    'mongodb+srv://admin:123456aaa@cluster0-cd9gz.mongodb.net/db-contacts?retryWrites=true&w=majority',
+    'mongodb+srv://admin:pas123456@cluster0-cd9gz.mongodb.net/db-contacts?retryWrites=true&w=majority',
     { useNewUrlParser: true, useUnifiedTopology: true },
     err => {
       if (err) {
